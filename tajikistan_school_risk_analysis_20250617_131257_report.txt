@@ -1,0 +1,31 @@
+SCHOOL RISK ANALYSIS REPORT
+===================================================
+
+Country: Tajikistan
+Analysis Date: 2025-06-17T13:12:57.816667
+Total Schools Analyzed: 370
+Total Healthcare Facilities: 517
+
+RISK DISTRIBUTION:
+- High Risk: 2 schools
+- Medium-High Risk: 100 schools
+- Medium-Low Risk: 122 schools
+- Low Risk: 28 schools
+
+RISK STATISTICS:
+- Average Risk Score: 0.4290
+- Median Risk Score: 0.4690
+- Maximum Risk Score: 0.9016
+- Minimum Risk Score: 0.0596
+
+HEALTHCARE ACCESS:
+- Average Distance to Healthcare: 0.0392 degrees
+- Schools without Healthcare within 10km: 25
+
+METHODOLOGY:
+Risk Weights Used:
+  - healthcare_distance: 0.35
+  - healthcare_capacity: 0.2
+  - road_conditions: 0.25
+  - infrastructure_age: 0.15
+  - environmental_hazards: 0.05

@@ -1,0 +1,61 @@
+{
+  "country": "Tajikistan",
+  "analysis_date": "2025-06-17T13:12:57.816667",
+  "total_schools_analyzed": 370,
+  "total_healthcare_facilities": 517,
+  "high_risk_schools": 2,
+  "medium_high_risk_schools": 100,
+  "medium_low_risk_schools": 122,
+  "low_risk_schools": 28,
+  "average_composite_risk": 0.4289615226523522,
+  "median_composite_risk": 0.4690212250778626,
+  "max_composite_risk": 0.9016455612907406,
+  "min_composite_risk": 0.05961252065288303,
+  "avg_healthcare_distance": 0.03919251170721967,
+  "schools_without_nearby_healthcare": 25,
+  "risk_weights_used": {
+    "healthcare_distance": 0.35,
+    "healthcare_capacity": 0.2,
+    "road_conditions": 0.25,
+    "infrastructure_age": 0.15,
+    "environmental_hazards": 0.05
+  },
+  "analysis_parameters": {
+    "distance_thresholds": {
+      "emergency": 0.05,
+      "routine": 0.1,
+      "accessible": 0.2
+    },
+    "facility_priorities": {
+      "hospital": 1.0,
+      "emergency_hospital": 1.2,
+      "clinic": 0.8,
+      "health_center": 0.7,
+      "doctors": 0.6,
+      "pharmacy": 0.4,
+      "dentist": 0.3
+    },
+    "infrastructure_age_indicators": {
+      "modern_keywords": [
+        "\u0433\u0438\u043c\u043d\u0430\u0437\u0438\u044f",
+        "\u043b\u0438\u0446\u0435\u0439",
+        "\u0446\u0435\u043d\u0442\u0440",
+        "modern",
+        "new",
+        "academy"
+      ],
+      "traditional_keywords": [
+        "\u0448\u043a\u043e\u043b\u0430",
+        "\u043c\u0430\u043a\u0442\u0430\u0431",
+        "school",
+        "basic"
+      ],
+      "building_quality_indicators": [
+        "brick",
+        "concrete",
+        "permanent",
+        "temporary"
+      ]
+    }
+  }
+}
