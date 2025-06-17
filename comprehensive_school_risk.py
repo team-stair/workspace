@@ -42,6 +42,10 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
+import osmnx as ox
+import networkx as nx
+
+
 warnings.filterwarnings('ignore')
 
 class SchoolRiskMapper:
@@ -132,6 +136,7 @@ class SchoolRiskMapper:
         self.roads_data = None
         self.population_data = None
         self.results_df = None
+        self.poi_data = None
         
         # Scalers for normalization
         self.scaler = MinMaxScaler()
@@ -200,6 +205,38 @@ class SchoolRiskMapper:
             raise ValueError("❌ Failed to load essential data files. Please check file paths and formats.")
         
         return True
+    
+    def _build_routing_graph(self):
+        """Download & project the OSM driving network around our points."""
+        # concatenate all school + facility geometries
+        all_pts = pd.concat([
+            self.healthcare_facilities.geometry,
+            self.education_facilities.geometry
+        ])
+        lat = all_pts.map(lambda p: p.y)
+        lon = all_pts.map(lambda p: p.x)
+        pad = 0.02  # ~2 km buffer
+        north, south = lat.max() + pad, lat.min() - pad
+        east, west   = lon.max() + pad, lon.min() - pad
+
+        # pull “drive” network and project to local UTM
+        G = ox.graph_from_bbox(north, south, east, west, network_type='drive')
+        self.G = ox.project_graph(G)
+
+    def _map_nearest_nodes(self):
+        """Snap each school & facility to its nearest graph node."""
+        proj_crs = self.G.graph['crs']
+        schools_proj = self.education_facilities.to_crs(proj_crs)
+        facs_proj    = self.healthcare_facilities.to_crs(proj_crs)
+
+        self.school_nodes = {
+            idx: ox.distance.nearest_nodes(self.G, geom.x, geom.y)
+            for idx, geom in schools_proj.geometry.iteritems()
+        }
+        self.facility_nodes = {
+            idx: ox.distance.nearest_nodes(self.G, geom.x, geom.y)
+            for idx, geom in facs_proj.geometry.iteritems()
+        }
 
     def _auto_detect_file(self, keywords, extensions):
         """Auto-detect files based on keywords and extensions"""
@@ -304,6 +341,15 @@ class SchoolRiskMapper:
             df = df[df['amenity'].isin(school_types)]
         
         return df
+    
+    def _clean_poi_data(self, df):
+        """Keep only amenities relevant for earthquake open‐spaces."""
+        df = df.dropna(subset=['geometry'])
+        # e.g. parks, playgrounds, open spaces, taxi stands for evacuation transport
+        allowed = ['traffic_park', 'parking', 'ranger_station', 'grave_yard','public_yard','bbq']
+        if 'amenity' in df.columns:
+            df = df[df['amenity'].str.lower().isin(allowed)]
+        return df
 
     def calculate_healthcare_distance_risk(self):
         """
@@ -357,6 +403,20 @@ class SchoolRiskMapper:
             facility_distances = {}
             facility_counts = {'5km': 0, '10km': 0, '20km': 0}
             
+            # just before your cdist call
+            schools_coords = np.array([[pt.x, pt.y] for pt in self.education_facilities.geometry])
+            healthcare_coords = np.array([[pt.x, pt.y] for pt in self.healthcare_facilities.geometry])
+
+            # debug output:
+            print(f"→ schools_coords.shape = {schools_coords.shape}")
+            print(f"→ healthcare_coords.shape = {healthcare_coords.shape}")
+            print(f"→ healthcare_coords sample:\n{healthcare_coords[:5]!r}")
+
+            # optionally guard against the empty case
+            if healthcare_coords.ndim != 2 or healthcare_coords.shape[1] != 2:
+                raise ValueError(f"Expected healthcare_coords to be (N,2), got {healthcare_coords.shape}")
+
+            # now compute distances
             distances_all = cdist([school_coord], healthcare_coords, metric='euclidean')[0]
             
             # Process each facility type
@@ -464,6 +524,40 @@ class SchoolRiskMapper:
         print(f"📊 Average distance to nearest facility: {results_df['nearest_overall_dist'].mean():.4f} degrees")
         
         return results_df
+    def calculate_poi_distance(self, thresholds=(0.001, 0.002, 0.005)):
+        """
+        thresholds in degrees (approx): 0.001≈100m, 0.002≈200m, 0.005≈500m
+        Returns a DataFrame keyed by school index with:
+         - nearest_poi_dist
+         - count_within_[100m,200m,500m]
+         - poi_access_score (1–dist/threshold)
+        """
+        if self.poi_data is None:
+            raise ValueError("Load poi_data first")
+        # school coords
+        school_coords = np.array([[pt.x, pt.y] for pt in self.education_facilities.geometry])
+        poi_coords    = np.array([[pt.x, pt.y] for pt in self.poi_data.geometry])
+        results = {
+            'school_idx': [],
+            'nearest_poi_dist': [],
+            'count_within_100m': [],
+            'count_within_200m': [],
+            'count_within_500m': [],
+            'poi_access_score': []
+        }
+        for idx, coord in enumerate(school_coords):
+            dists = cdist([coord], poi_coords, metric='euclidean')[0]
+            nearest = float(np.min(dists)) if len(dists)>0 else None
+            results['school_idx'].append(idx)
+            results['nearest_poi_dist'].append(nearest)
+            # counts
+            results['count_within_100m'].append(int(np.sum(dists < thresholds[0])))
+            results['count_within_200m'].append(int(np.sum(dists < thresholds[1])))
+            results['count_within_500m'].append(int(np.sum(dists < thresholds[2])))
+            # simple access score (clamp between 0 and 1)
+            score = 1.0 - (nearest / thresholds[2]) if nearest is not None else 0.0
+            results['poi_access_score'].append(max(0.0, min(score, 1.0)))
+        return pd.DataFrame(results).set_index('school_idx')
 
     def _calculate_access_score(self, distance, threshold):
         """Calculate access score based on distance and threshold"""
@@ -1434,6 +1528,9 @@ class SchoolRiskMapper:
             # Load data
             print("\n1️⃣  Loading and validating data...")
             self.load_data(**kwargs.get('load_params', {}))
+            # ── build network once and index nodes ──
+            self._build_routing_graph()
+            self._map_nearest_nodes()
             
             # Calculate composite risk
             print("\n2️⃣  Calculating comprehensive risk scores...")
@@ -1520,7 +1617,7 @@ if __name__ == "__main__":
         results = mapper.run_complete_analysis(
             output_dir="tajikistan_comprehensive_analysis",
             load_params={
-                'healthcare_file': str(data_dir / "healthcare_tajikistan.csv"),
+                'healthcare_file': str(data_dir / "hotosm_tjk_buildings_polygons_geojson.geojson"),
                 'education_file': str(data_dir / "hotosm_tjk_education_facilities_points_geojson.geojson"),
                 'auto_detect': False
             },

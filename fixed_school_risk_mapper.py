@@ -1471,24 +1471,26 @@ if __name__ == "__main__":
     # Configuration for Tajikistan
     tajikistan_config = {
         'risk_weights': {
-            'healthcare_distance': 0.35,
-            'healthcare_capacity': 0.20,
+            'open_space_distance': 0.35,
+            'open_space_capacity': 0.20,
+            'healthcare_distance': 0.25,
+            'healthcare_capacity': 0.10,
             'road_conditions': 0.25,
-            'infrastructure_age': 0.15,
+            'infrastructure_age': 0.15, 
             'environmental_hazards': 0.05
         },
         'analysis_params': {
             'distance_thresholds': {
                 'emergency': 0.05,    # 5km
-                'routine': 0.1,       # 10km  
                 'accessible': 0.2     # 20km
             },
             'facility_priorities': {
                 'hospital': 1.0,
+                'pitch': 1.0,
+                
                 'clinic': 0.8,
                 'doctors': 0.6,
                 'pharmacy': 0.4,
-                'dentist': 0.3
             }
         }
     }
