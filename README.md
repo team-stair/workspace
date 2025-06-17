@@ -25,7 +25,7 @@ To understand the full context, data pipeline, and visual approach behind this t
   * Healthcare accessibility analysis
   * Road condition assessment
   * Infrastructure age evaluation
-  * Proximity to "shelter base"
+  * Proximity to "shelter space"
   * Composite risk scoring with map overlays
   * Comprehensive labeling and visualization
 * Provides visualizations for maps, graphs, and dashboards.
@@ -117,9 +117,9 @@ pip install -r requirements.txt
 
 ### Authors
 
-Team stair
+Team Stair
 
-Alice, Benjamin, Cintya , Anna
+Alice, Benjamin, Cintya, Anna
 
 Adapted and expanded from the UN-Tech-Over challenge framework
 
