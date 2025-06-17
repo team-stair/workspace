@@ -1,0 +1,76 @@
+{
+  "total_schools": 370,
+  "schools_with_healthcare_access": 370,
+  "avg_distance_to_nearest_facility": 0.04125011989278119,
+  "median_distance_to_nearest_facility": 0.008561642908970647,
+  "max_distance_to_nearest_facility": 0.7946802031822957,
+  "schools_within_5km_of_hospital": 2043,
+  "schools_within_5km_of_clinic": 765,
+  "risk_distribution": {
+    "Medium Risk": 184,
+    "High Risk": 93,
+    "Low Risk": 93
+  },
+  "top_10_highest_risk_schools": [
+    {
+      "school_name": "\u0428\u043a\u043e\u043b\u0430-\u0438\u043d\u0442\u0435\u0440\u043d\u0430\u0442 \u2116 11",
+      "nearest_facility_type": "doctors",
+      "nearest_any_facility_dist": 0.3430014032205949,
+      "access_risk_category": "High Risk"
+    },
+    {
+      "school_name": null,
+      "nearest_facility_type": "doctors",
+      "nearest_any_facility_dist": 0.0015334521958702847,
+      "access_risk_category": "High Risk"
+    },
+    {
+      "school_name": null,
+      "nearest_facility_type": "doctors",
+      "nearest_any_facility_dist": 0.0010381660874676677,
+      "access_risk_category": "High Risk"
+    },
+    {
+      "school_name": null,
+      "nearest_facility_type": "doctors",
+      "nearest_any_facility_dist": 0.0018786535316462408,
+      "access_risk_category": "High Risk"
+    },
+    {
+      "school_name": "Shkola-9 \"Manas\"",
+      "nearest_facility_type": "pharmacy",
+      "nearest_any_facility_dist": 0.0008616777383301349,
+      "access_risk_category": "High Risk"
+    },
+    {
+      "school_name": null,
+      "nearest_facility_type": "pharmacy",
+      "nearest_any_facility_dist": 0.0006256341646518051,
+      "access_risk_category": "High Risk"
+    },
+    {
+      "school_name": null,
+      "nearest_facility_type": "pharmacy",
+      "nearest_any_facility_dist": 0.014525702042837036,
+      "access_risk_category": "High Risk"
+    },
+    {
+      "school_name": "\u041c\u0430\u043a\u0442\u0430\u0431 \u043c\u0443\u0437\u0438\u049b\u0438\u0438 \u0431\u0430\u0447\u0430\u0433\u043e\u043d\u0430",
+      "nearest_facility_type": "pharmacy",
+      "nearest_any_facility_dist": 0.01482241953455229,
+      "access_risk_category": "High Risk"
+    },
+    {
+      "school_name": null,
+      "nearest_facility_type": "doctors",
+      "nearest_any_facility_dist": 0.7946802031822957,
+      "access_risk_category": "High Risk"
+    },
+    {
+      "school_name": null,
+      "nearest_facility_type": "doctors",
+      "nearest_any_facility_dist": 0.0008879418560073527,
+      "access_risk_category": "High Risk"
+    }
+  ]
+}

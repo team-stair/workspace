@@ -31,7 +31,7 @@ from pathlib import Path
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from sklearn.cluster import KMeans
 from scipy.spatial.distance import cdist
-from shapely.geometry import Point, Polygon, buffer
+from shapely.geometry import Point, Polygon
 import warnings
 import json
 from datetime import datetime
@@ -142,6 +142,14 @@ class SchoolRiskMapper:
         print(f"⚖️  Risk weights: {self.risk_weights}")
 
     def load_data(self, healthcare_file=None, education_file=None, roads_file=None, auto_detect=True):
+        print("→ auto_detect:", auto_detect)
+        if auto_detect:
+            healthcare_file = self._auto_detect_file([...])
+            education_file = self._auto_detect_file([...])
+            roads_file      = self._auto_detect_file([...])
+        print(f"→ healthcare_file = {healthcare_file!r}  exists? {Path(healthcare_file or '').exists()}")
+        print(f"→ education_file = {education_file!r}  exists? {Path(education_file or '').exists()}")
+        print(f"→ roads_file      = {roads_file!r}  exists? {Path(roads_file or '').exists()}")
         """
         Load healthcare, education, and supporting data files.
         
@@ -210,16 +218,31 @@ class SchoolRiskMapper:
         try:
             if file_path.suffix.lower() == '.csv':
                 df = pd.read_csv(file_path)
-                # Try to detect coordinate columns
-                coord_cols = self._detect_coordinate_columns(df)
-                if coord_cols:
-                    gdf = gpd.GeoDataFrame(
-                        df, 
-                        geometry=gpd.points_from_xy(df[coord_cols[0]], df[coord_cols[1]])
-                    )
-                    return gdf
+
+                # 1) If you have explicit X/Y columns, use them:
+                if 'X' in df.columns and 'Y' in df.columns:
+                    lon_col, lat_col = 'X', 'Y'
                 else:
-                    return df
+                    # otherwise fall back to your detector
+                    coords = self._detect_coordinate_columns(df)
+                    if coords:
+                        lon_col, lat_col = coords
+                    else:
+                        # no coords at all—just return raw df
+                        return df
+
+                # 2) Force X/Y to numeric, drop any rows that fail
+                df[lon_col] = pd.to_numeric(df[lon_col], errors='coerce')
+                df[lat_col] = pd.to_numeric(df[lat_col], errors='coerce')
+                df = df.dropna(subset=[lon_col, lat_col])
+
+                # 3) Build your GeoDataFrame
+                gdf = gpd.GeoDataFrame(
+                    df,
+                    geometry=gpd.points_from_xy(df[lon_col], df[lat_col]),
+                    crs="EPSG:4326"
+                )
+                return gdf
             else:
                 return gpd.read_file(file_path)
         except Exception as e:
@@ -1486,31 +1509,25 @@ if __name__ == "__main__":
         }
     }
     
-    # Initialize mapper
+    data_dir = Path(os.getcwd()) / "data"
     mapper = SchoolRiskMapper(
         country_name="Tajikistan",
-        data_dir=str(os.getcwd()) + "/data",
+        data_dir=str(data_dir),
         config=tajikistan_config
     )
-    
-    # Run analysis
+
     try:
         results = mapper.run_complete_analysis(
             output_dir="tajikistan_comprehensive_analysis",
             load_params={
-                'healthcare_file': 'tajikistan.csv',
-                'education_file': 'hotosm_tjk_education_facilities_points_geojson.geojson',
-                'auto_detect': True
+                'healthcare_file': str(data_dir / "healthcare_tajikistan.csv"),
+                'education_file': str(data_dir / "hotosm_tjk_education_facilities_points_geojson.geojson"),
+                'auto_detect': False
             },
-            viz_params={
-                'include_interactive': True
-            },
-            export_params={
-                'formats': ['csv', 'geojson', 'excel']
-            }
+            viz_params={ 'include_interactive': True },
+            export_params={ 'formats': ['csv','geojson','excel'] }
         )
-        
-        print("\n✨ Ready for UNICEF GeoSight integration!")
+        print("✨ Ready for UNICEF GeoSight integration!")
         
     except Exception as e:
         print(f"❌ Error in demonstration: {e}")

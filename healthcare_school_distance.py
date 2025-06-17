@@ -218,6 +218,7 @@ def calculate_distances_to_healthcare(schools_gdf, healthcare_df):
     print(f"✓ Distance analysis complete for {len(results_df)} schools")
     return results_df
 
+
 def create_distance_visualizations(schools_gdf, healthcare_df, distance_results, output_dir="distance_analysis"):
     """Create comprehensive visualizations of distance analysis"""
     
@@ -400,7 +401,7 @@ def main():
     print("=== Tajikistan Healthcare Distance Analysis ===")
     print("Building on getting_started.py methodology\n")
     
-    data_dir = "/Users/alice/Developer/UN-Tech-Over2/data"
+    data_dir = "data"
     
     # Load data
     print("1. Loading healthcare facilities...")
