@@ -117,6 +117,10 @@ pip install -r requirements.txt
 
 ### Authors
 
+Team stair
+
+Alice, Benjamin, Cintya , Anna
+
 Adapted and expanded from the UN-Tech-Over challenge framework
 
 For more, see: [https://opensource.unicc.org/open-source-united-initiative/un-tech-over/](https://opensource.unicc.org/open-source-united-initiative/un-tech-over/)
