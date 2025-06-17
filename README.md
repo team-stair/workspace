@@ -62,7 +62,7 @@ Customizable weights and parameters (see `tajikistan_config` in script):
 Run the script via:
 
 ```bash
-python3 school_risk_mapper.py
+python3 fixed_school_risk_mapper.py
 ```
 
 The default example runs an analysis for Tajikistan using sample files and saves all outputs to the folder:
